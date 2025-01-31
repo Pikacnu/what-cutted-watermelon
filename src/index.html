@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>What cuts Watermelon</title>
+  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+</head>
+
+<body style="margin: 0; padding: 0;background-color: black;font-size: large;">
+  <div class="flex w-full h-screen justify-center items-center text-white">
+    <div class="flex flex-col items-center">
+      <h1 class="text-4xl text-white">What cuts <p class="text-3xl inline" id="emoji">🍉</p>
+      </h1>
+      <div class="flex flex-col items-center mt-8">
+        <div class="flex items-center justify-center ">
+          <label for="style" class="text-white">Bot Style:</label>
+          <select name="" id="style" class="text-white h-10 rounded-lg px-4 *:text-black flex-grow">
+            <option value="Chaos">Chaos</option>
+            <option value="Normal" selected>Normal</option>
+            <option value="Scientific">Scientific</option>
+          </select>
+        </div>
+        <input type="text" class="w-80 h-10 rounded-lg px-4" placeholder="Enter the name of anything" id="input">
+        <button class="w-80 h-10 bg-blue-500 text-white rounded-lg mt-4 hover:bg-blue-700 transition-all delay-200"
+          id="button">Cut it!</button>
+        <h2 class="text-white mt-4 w-[60vw]" id="reason"></h2>
+        <h3 class="text-stone-500" id="times"></h3>
+      </div>
+    </div>
+  </div>
+  <div class="fixed bottom-0 w-full flex justify-center items-center bg-black bg-opacity-50 hidden" id="loading">
+    <div role="status">
+      <svg aria-hidden="true" class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
+        viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+          fill="currentColor" />
+        <path
+          d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+          fill="currentFill" />
+      </svg>
+      <span class="sr-only">Loading...</span>
+    </div>
+  </div>
+  <script>
+    let tool = document.getElementById('input');
+    let button = document.getElementById('button');
+    let emoji = document.getElementById('emoji');
+    let times = document.getElementById('times');
+    let reason = document.getElementById('reason');
+    let styleSelector = document.getElementById('style');
+    let loading = document.getElementById('loading');
+    let style = 'Normal';
+    let target = 'watermelon';
+    const delay = 5 * 1000;
+
+    styleSelector.addEventListener('change', (e) => {
+      style = e.target.value;
+    })
+
+    const timeChecker = (() => {
+      let last = new Date().getTime() - delay;
+      return () => {
+        now = new Date().getTime();
+        if (now - last > delay) {
+          last = now;
+          return true;
+        }
+        return false;
+      }
+    })()
+
+    button.addEventListener('click', async (e) => {
+      if (!timeChecker()) {
+        return;
+      }
+      let toolName = tool.value.toLowerCase();
+      let targetName = target.toLowerCase();
+      loading.classList.remove('hidden');
+
+      if (toolName === targetName) {
+        reason.innerText = 'You can\'t cut the same thing';
+        tool.value = '';
+        times.innerText = '';
+        loading.classList.add('hidden');
+        return;
+      }
+
+      const response = await fetch(`/api/cut`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          tool: toolName,
+          target: targetName,
+          style: style
+        })
+      })
+      const data = await response.json();
+      const message = data.message;
+      if (message !== 'OK') {
+        reason.innerText = message;
+        tool.value = '';
+        times.innerText = '';
+        return;
+      }
+      loading.classList.add('hidden');
+      reason.innerText = `Reason : ${data.reason}`;
+      times.innerText = `Alearady Tried: ${data.count} times`;
+      emoji.innerText = data.icon;
+      input.value = '';
+      target = toolName;
+    })
+
+  </script>
+</body>
+
+</html>

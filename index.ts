@@ -24,9 +24,9 @@ const responseStyle: Record<ResponseStyle, string> = {
 };
 
 const responseToText: Record<ResponseStyle, string> = {
-	[ResponseStyle.Chaos]: 'chaotic',
-	[ResponseStyle.Normal]: 'normal',
-	[ResponseStyle.Scientific]: 'scientific',
+	[ResponseStyle.Chaos]: 'Chaos',
+	[ResponseStyle.Normal]: 'Normal',
+	[ResponseStyle.Scientific]: 'Scientific',
 };
 
 async function getResponse(
@@ -95,6 +95,14 @@ Bun.serve({
 	port: port,
 	async fetch(request, server) {
 		const url = new URL(request.url);
+		console.log(`${request.method} ${url.pathname}`);
+		if (url.pathname === '/') {
+			return new Response(Bun.file('./src/index.html'), {
+				headers: {
+					'Content-Type': 'text/html',
+				},
+			});
+		}
 		if (url.pathname === '/api/cut') {
 			if (request.method !== 'POST') {
 				return new Response('Method Not Allowed', {
@@ -138,11 +146,24 @@ Bun.serve({
 					},
 				);
 			}
-			return new Response(JSON.stringify(response), {
-				headers: {
-					'Content-Type': 'application/json',
+
+			await new Promise((resolve) => setTimeout(resolve, 1000));
+
+			return new Response(
+				JSON.stringify(
+					Object.assign(
+						{
+							message: 'OK',
+						},
+						response,
+					),
+				),
+				{
+					headers: {
+						'Content-Type': 'application/json',
+					},
 				},
-			});
+			);
 		}
 		return new Response(createResponseMessage('Not Found', ''), {
 			status: 404,
