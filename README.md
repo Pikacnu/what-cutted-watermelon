@@ -1,15 +1,22 @@
-# open-ai-test
+# what-cutted-watermelon
 
-To install dependencies:
+## Installation
+
+To install dependencies, run:
 
 ```bash
 bun install
 ```
 
-To run:
+## Usage
+
+To start the project, run:
 
 ```bash
 bun run index.ts
 ```
 
-This project was created using `bun init` in bun v1.2.0. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+## About
+
+This project was created using `bun init` with bun v1.2.0. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+
